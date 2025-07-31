@@ -24,7 +24,7 @@ Uma aplicação web simples para criar, editar e gerenciar notas pessoais, desen
 
 1. **Clone ou baixe o projeto**
    ```bash
-   cd gustavo
+   cd Bloco de Notas
    ```
 
 2. **Instale as dependências**
