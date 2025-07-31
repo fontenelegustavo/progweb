@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Nova Nota - Bloco de Notas</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand" href="/notes">
+          <i class="fas fa-sticky-note me-2"></i>Bloco de Notas
+        </a>
+        <a href="/notes" class="btn btn-light">
+          <i class="fas fa-arrow-left me-1"></i>Voltar
+        </a>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <h1 class="mb-4">
+            <i class="fas fa-plus-circle me-2"></i>Nova Nota
+          </h1>
+
+          <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+            <div class="alert alert-success" role="alert">
+              <i class="fas fa-check-circle me-2"></i><%= successMessage %>
+            </div>
+          <% } %>
+
+          <% if (typeof error !== 'undefined') { %>
+            <div class="alert alert-danger" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+            </div>
+          <% } %>
+
+          <form method="POST" action="/notes" id="noteForm">
+            <div class="mb-3">
+              <label for="title" class="form-label">Título *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="title" 
+                name="title" 
+                value="<%= typeof title !== 'undefined' ? title : '' %>"
+                required
+                maxlength="100"
+                placeholder="Digite o título da sua nota..."
+              >
+              <div class="form-text">Máximo 100 caracteres</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="category" class="form-label">Categoria</label>
+              <select class="form-select" id="category" name="category">
+                <option value="Geral" <%= (typeof category !== 'undefined' && category === 'Geral') || typeof category === 'undefined' ? 'selected' : '' %>>📝 Geral</option>
+                <option value="Trabalho" <%= (typeof category !== 'undefined' && category === 'Trabalho') ? 'selected' : '' %>>💼 Trabalho</option>
+                <option value="Pessoal" <%= (typeof category !== 'undefined' && category === 'Pessoal') ? 'selected' : '' %>>👤 Pessoal</option>
+                <option value="Estudos" <%= (typeof category !== 'undefined' && category === 'Estudos') ? 'selected' : '' %>>📚 Estudos</option>
+                <option value="Ideias" <%= (typeof category !== 'undefined' && category === 'Ideias') ? 'selected' : '' %>>💡 Ideias</option>
+                <option value="Importante" <%= (typeof category !== 'undefined' && category === 'Importante') ? 'selected' : '' %>>⭐ Importante</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="content" class="form-label">Conteúdo *</label>
+              <textarea 
+                class="form-control" 
+                id="content" 
+                name="content" 
+                rows="12" 
+                required
+                placeholder="Digite o conteúdo da sua nota..."
+                style="resize: vertical; min-height: 200px;"
+              ><%= typeof content !== 'undefined' ? content : '' %></textarea>
+              <div class="form-text">
+                <span id="charCount">0</span> caracteres
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="saveAndNew" name="saveAndNew">
+                  <label class="form-check-label" for="saveAndNew">
+                    Salvar e criar nova nota
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="/notes" class="btn btn-secondary me-md-2">
+                <i class="fas fa-times me-1"></i>Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i>Salvar Nota
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Contador de caracteres
+      const contentTextarea = document.getElementById('content');
+      const charCount = document.getElementById('charCount');
+      
+      function updateCharCount() {
+        const count = contentTextarea.value.length;
+        charCount.textContent = count.toLocaleString();
+        
+        // Mudar cor baseado no tamanho
+        if (count > 1000) {
+          charCount.className = 'text-warning';
+        } else if (count > 2000) {
+          charCount.className = 'text-danger';
+        } else {
+          charCount.className = 'text-muted';
+        }
+      }
+      
+      contentTextarea.addEventListener('input', updateCharCount);
+      contentTextarea.addEventListener('keyup', updateCharCount);
+      
+      // Atualizar contador na carga da página
+      updateCharCount();
+      
+      // Validação do formulário
+      document.getElementById('noteForm').addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
+        
+        if (!title) {
+          e.preventDefault();
+          alert('Por favor, digite um título para a nota.');
+          document.getElementById('title').focus();
+          return false;
+        }
+        
+        if (!content) {
+          e.preventDefault();
+          alert('Por favor, digite o conteúdo da nota.');
+          document.getElementById('content').focus();
+          return false;
+        }
+        
+        // Mostrar loading
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Salvando...';
+        submitBtn.disabled = true;
+        
+        // Se algo der errado, restaurar o botão após 5 segundos
+        setTimeout(() => {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }, 5000);
+      });
+      
+      // Auto-save em localStorage (backup)
+      function autoSave() {
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        const category = document.getElementById('category').value;
+        
+        if (title || content) {
+          localStorage.setItem('noteBackup', JSON.stringify({
+            title,
+            content,
+            category,
+            timestamp: new Date().toISOString()
+          }));
+        }
+      }
+      
+      // Restaurar backup se existir
+      function restoreBackup() {
+        const backup = localStorage.getItem('noteBackup');
+        if (backup) {
+          try {
+            const data = JSON.parse(backup);
+            if (confirm('Foram encontrados dados de uma nota não salva. Deseja restaurá-los?')) {
+              document.getElementById('title').value = data.title || '';
+              document.getElementById('content').value = data.content || '';
+              document.getElementById('category').value = data.category || 'Geral';
+              updateCharCount();
+            }
+            localStorage.removeItem('noteBackup');
+          } catch (e) {
+            console.log('Erro ao restaurar backup:', e);
+          }
+        }
+      }
+      
+      // Auto-save a cada 10 segundos
+      setInterval(autoSave, 10000);
+      
+      // Salvar ao digitar (debounced)
+      let saveTimeout;
+      function debouncedSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(autoSave, 2000);
+      }
+      
+      document.getElementById('title').addEventListener('input', debouncedSave);
+      document.getElementById('content').addEventListener('input', debouncedSave);
+      document.getElementById('category').addEventListener('change', debouncedSave);
+      
+      // Restaurar backup na carga da página
+      window.addEventListener('load', restoreBackup);
+      
+      // Limpar backup ao sair da página (nota salva)
+      window.addEventListener('beforeunload', function(e) {
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
+        
+        if (title || content) {
+          e.preventDefault();
+          e.returnValue = 'Você tem alterações não salvas. Tem certeza que deseja sair?';
+        }
+      });
+    </script>
+  </body>
+</html>

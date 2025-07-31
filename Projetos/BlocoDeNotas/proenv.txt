@@ -1,0 +1,2 @@
+MONGODB_URI=mongodb+srv://gustavofontenele04:@cluster0.sap9mtp.mongodb.net/
+MONGODB_URI2=mongodb+srv://gustavofontenele04:@cluster0.sap9mtp.mongodb.net/notebook
