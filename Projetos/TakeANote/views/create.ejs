@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Nota - TakeANote</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <div class="container mt-4">
+        <h2>Criar Nova Nota</h2>
+        <form>
+            <div class="mb-3">
+                <label for="noteName" class="form-label">Nome da Nota</label>
+                <input type="text" class="form-control" id="noteName" placeholder="Digite o nome">
+            </div>
+            <div class="mb-3">
+                <label for="noteDate" class="form-label">Data</label>
+                <input type="date" class="form-control" id="noteDate">
+            </div>
+            <div class="mb-3">
+                <label for="noteContent" class="form-label">Conteúdo da Nota</label>
+                <textarea class="form-control" id="noteContent" rows="5"></textarea>
+            </div>
+            <button type="submit" class="btn btn-create">Salvar Nota</button>
+        </form>
+    </div>
+</body>
+</html>
