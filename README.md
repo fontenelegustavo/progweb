@@ -1,1 +1,1 @@
-# atividade respectiva à aula 6a
+# atividade respectiva à aula 6b
